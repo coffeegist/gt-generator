@@ -8,7 +8,7 @@ from neo4jrestclient import client
 def get_domain_sid(db, domain):
     domain_sid = None
 
-    q = 'MATCH (d:Domain {{name: "{}"}}) return d.objectsid'.format(domain)
+    q = 'MATCH (d:Domain {{name: "{}"}}) return d.objectid'.format(domain)
     results = db.query(q)
 
     if len(results) > 1:
@@ -23,7 +23,7 @@ def get_user_groups(db, user, domain):
     user_sid = None
     group_sids = []
 
-    q = 'MATCH (u:User {{name: "{}@{}"}}), (g:Group) MATCH (u)-[r:MemberOf*]->(g) return DISTINCT u.objectsid, g.objectsid'.format(user, domain)
+    q = 'MATCH (u:User {{name: "{}@{}"}}), (g:Group) MATCH (u)-[r:MemberOf*]->(g) return DISTINCT u.objectid, g.objectnid'.format(user, domain)
     results = db.query(q, returns=(str, str))
 
     for r in results:
