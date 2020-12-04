@@ -23,7 +23,7 @@ def get_user_groups(db, user, domain):
     user_sid = None
     group_sids = []
 
-    q = 'MATCH (u:User {{name: "{}@{}"}}), (g:Group) MATCH (u)-[r:MemberOf*]->(g) return DISTINCT u.objectid, g.objectnid'.format(user, domain)
+    q = 'MATCH (u:User {{name: "{}@{}"}}), (g:Group) MATCH (u)-[r:MemberOf*]->(g) return DISTINCT u.objectid, g.objectid'.format(user, domain)
     results = db.query(q, returns=(str, str))
 
     for r in results:
